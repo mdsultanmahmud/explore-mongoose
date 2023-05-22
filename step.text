@@ -6,3 +6,23 @@ Model>>  the First letter of the name of model must be capital letter
 like, const Product = mongoose.model("Product", ProductSchema)
 
 ** you can validate json data from online
+
+
+*****save a data 
+ // we can save data in two way  1. save or 2. create
+    // now we are going to se save method 
+    //instance creation >> do something >> save()
+    const product = new Product(req.body)
+    if(product.quantity == 0){ //we can more validate here(save() method is better)
+        product.status = "out-of-stock"
+    }
+    const result = await product.save()
+
+    // we can add a product with another method create 
+
+    // const result = await Product.create(req.body) 
+
+
+** middleware when save the data >> pre / post 
+// schemaname.middeearename("method name", normal function)
+//single data loadd korar jnno ObjectId dite hbe na 

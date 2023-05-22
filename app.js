@@ -91,30 +91,56 @@ const productSchema = mongoose.Schema({
 })
 
 
+// mongoose middeware for saving data >> pre / post
+
+// schemaname.middeearename("method name", normal function)
+
+productSchema.pre('save', function (next) {
+    if (this.quantity == 0) {
+        this.status = "out-of-stock"
+    }
+    console.log("Before save the data")
+    next()
+})
+
+productSchema.post('save', function (doc, next) {
+    console.log("After saving the dataa")
+    console.log(doc)
+    next()
+})
+
+// you can create an instance 
+
+productSchema.methods.logger = function () {
+    console.log(`product save successfully with name ${this.name}`)
+}
+
 // how to make a model 
 // mongoose follows ... Schema >> Model >> Query 
 // make a model 
 const Product = mongoose.model('Product', productSchema)
-// to do query 
-app.post("/api/v1/product", async(req ,res, next) =>{
+
+// to do query (save a product)
+app.post("/api/v1/product", async (req, res, next) => {
     try {
         // we can save data in two way  1. save or 2. create
-    // now we are going to se save method 
-    //instance creation >> do something >> save()
-    const product = new Product(req.body)
-    if(product.quantity == 0){ //we can more validate here(save() method is better)
-        product.status = "out-of-stock"
-    }
-    const result = await product.save()
+        // now we are going to se save method 
+        //instance creation >> do something >> save()
+        const product = new Product(req.body)
+        if (product.quantity == 0) { //we can more validate here(save() method is better)
+            product.status = "out-of-stock"
+        }
+        const result = await product.save()
+        result.logger()
 
-    // we can add a product with another method create 
+        // we can add a product with another method create 
 
-    // const result = await Product.create(req.body) 
-    res.status(200).json({
-        success: true,
-        message: `Product have saved.`,
-        data: result
-    })
+        // const result = await Product.create(req.body) 
+        res.status(200).json({
+            success: true,
+            message: `Product have saved.`,
+            data: result
+        })
     } catch (error) {
         console.log(error)
         res.status(400).json({
@@ -124,6 +150,54 @@ app.post("/api/v1/product", async(req ,res, next) =>{
         })
     }
 })
+
+// get products 
+
+app.get("/api/v1/product", async (req, res, next) => {
+    try {
+        // const result = await Product.find({})
+        // load a single product 
+        // const result = await Product.find({_id: "646b0cd343a56d338467f5a6", name: "Mobile"})
+        // const result = await Product.find({$or: [{_id: "646b0cd343a56d338467f5a6"}, {name: "Laptop"}, {name: "Potato"}]})
+        // const result = await Product.find({status: {$ne: "out-of-stock"}})
+        // const result = await Product.find({status: {$eq: "out-of-stock"}})
+        // const result = await Product.find({name: {$in: ["Mobile", "Laptop", "Orange"]}})
+
+        // projection is very eassy in mongoose 
+        // const result = await Product.find({}, 'name quantity unit')
+        // const result = await Product.find({}, '-name -quantity -unit')
+        // const result = await Product.find({}).select({name: 1, unit: 1})
+        // const result = await Product.find({}).limit(3)
+        // const result = await Product.find({}).sort({
+        //     price: 1
+        // })
+
+        // mongoose provide us a better solution for qurying data 
+
+        // const result = await Product
+        // .where("name").equals(/\w/)
+        // .where("price").gt(50).lt(1000)
+        // .limit(2).sort({price: 1})
+
+        // load a single product with id 
+        const result = await Product.findById("646b056ddd4ab3ba4cbdd785")
+
+        res.status(200).json({
+            success: true,
+            message: "Data find successfully",
+            data: result
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({
+            success: false,
+            error: "Data inserted fail",
+            data: error
+        })
+    }
+})
+
+
 
 
 app.get("/", (req, res) => {
