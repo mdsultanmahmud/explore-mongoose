@@ -1,0 +1,8 @@
+mongoose design 
+>>Schema >> Model >> Query
+
+Model>>  the First letter of the name of model must be capital letter 
+... const  modelName = mongoose.model("modelName", SchemaName)
+like, const Product = mongoose.model("Product", ProductSchema)
+
+** you can validate json data from online
